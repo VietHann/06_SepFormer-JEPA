@@ -1,0 +1,186 @@
+# Generated 2026-09-19 from:
+# /project/anhlt/0607/research/source_predictive_sepformer/hparams/sepformer-jepa-libri2mix.yaml
+# yamllint disable
+# Source-predictive SepFormer for blind two-speaker Libri2Mix separation.
+# The clean-source encoder and predictor are training-only modules.
+
+seed: 1234
+__set_seed: !apply:speechbrain.utils.seed_everything [1234]
+
+data_folder: /project/anhlt/LibriMix/Libri2Mix
+type_data: libri2mix
+base_folder_dm: /project/anhlt/LibriMix/LibriSpeech/train-clean-100/
+
+experiment_name: source-predictive-sepformer-jepa-scratch-libri2mix
+output_folder: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234
+train_log: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/train_log.txt
+save_folder: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save
+train_data: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save/libri2mix_train-100.csv
+valid_data: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save/libri2mix_dev.csv
+test_data: 
+  results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save/libri2mix_test.csv
+skip_prep: false
+ckpt_interval_minutes: 60
+
+precision: fp32
+num_spks: 2
+noprogressbar: false
+save_audio: false
+sample_rate: 8000
+
+N_epochs: 200
+batch_size: 2
+lr: 0.00015
+clip_grad_norm: 5
+loss_upper_lim: 999999
+limit_training_signal_len: true
+training_signal_len: 72000
+
+dynamic_mixing: false
+use_wham_noise: false
+use_wavedrop: false
+use_speedperturb: true
+use_rand_shift: false
+min_shift: -8000
+max_shift: 8000
+speed_changes: &id001 [95, 100, 105]
+
+
+speed_perturb: !new:speechbrain.augment.time_domain.SpeedPerturb
+  orig_freq: 8000
+  speeds: *id001
+drop_freq_low: 0
+drop_freq_high: 1
+drop_freq_count_low: 1
+drop_freq_count_high: 3
+drop_freq_width: 0.05
+
+drop_freq: !new:speechbrain.augment.time_domain.DropFreq
+  drop_freq_low: 0
+  drop_freq_high: 1
+  drop_freq_count_low: 1
+  drop_freq_count_high: 3
+  drop_freq_width: 0.05
+
+drop_chunk_count_low: 1
+drop_chunk_count_high: 5
+drop_chunk_length_low: 1000
+drop_chunk_length_high: 2000
+
+drop_chunk: !new:speechbrain.augment.time_domain.DropChunk
+  drop_length_low: 1000
+  drop_length_high: 2000
+  drop_count_low: 1
+  drop_count_high: 5
+
+threshold_byloss: true
+threshold: -30
+
+N_encoder_out: 256
+out_channels: 256
+kernel_size: 16
+kernel_stride: 8
+d_ffn: 1024
+predictor_hidden_channels: 256
+source_prediction_weight: 0.1
+target_encoder_momentum: 0.999
+
+dataloader_opts:
+  batch_size: 2
+  num_workers: 0
+
+Encoder: &id004 !new:speechbrain.lobes.models.dual_path.Encoder
+  kernel_size: 16
+  out_channels: 256
+
+TargetEncoder: &id008 !new:speechbrain.lobes.models.dual_path.Encoder
+
+  kernel_size: 16
+  out_channels: 256
+
+SBtfintra: &id002 !new:speechbrain.lobes.models.dual_path.SBTransformerBlock
+  num_layers: 8
+  d_model: 256
+  nhead: 8
+  d_ffn: 1024
+  dropout: 0
+  use_positional_encoding: true
+  norm_before: true
+
+SBtfinter: &id003 !new:speechbrain.lobes.models.dual_path.SBTransformerBlock
+  num_layers: 8
+  d_model: 256
+  nhead: 8
+  d_ffn: 1024
+  dropout: 0
+  use_positional_encoding: true
+  norm_before: true
+
+MaskNet: &id006 !new:speechbrain.lobes.models.dual_path.Dual_Path_Model
+  num_spks: 2
+  in_channels: 256
+  out_channels: 256
+  num_layers: 2
+  K: 250
+  intra_model: *id002
+  inter_model: *id003
+  norm: ln
+  linear_layer_after_inter_intra: false
+  skip_around_intra: true
+
+Decoder: &id005 !new:speechbrain.lobes.models.dual_path.Decoder
+  in_channels: 256
+  out_channels: 1
+  kernel_size: 16
+  stride: 8
+  bias: false
+
+SourcePredictor: &id007 !new:models.SourceLatentPredictor
+  channels: 256
+  hidden_channels: 256
+
+source_prediction_loss: !new:models.NormalizedSourcePredictionLoss
+
+optimizer: !name:torch.optim.Adam
+  lr: 0.00015
+  weight_decay: 0
+
+loss: !name:speechbrain.nnet.losses.get_si_snr_with_pitwrapper
+
+lr_scheduler: &id009 !new:speechbrain.nnet.schedulers.ReduceLROnPlateau
+  factor: 0.5
+  patience: 2
+  dont_halve_until_epoch: 5
+
+epoch_counter: &id010 !new:speechbrain.utils.epoch_loop.EpochCounter
+
+  limit: 200
+
+modules:
+  encoder: *id004
+  decoder: *id005
+  masknet: *id006
+  source_predictor: *id007
+  target_encoder: *id008
+checkpointer: !new:speechbrain.utils.checkpoints.Checkpointer
+  checkpoints_dir: 
+    results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save
+  recoverables:
+    encoder: *id004
+    decoder: *id005
+    masknet: *id006
+    source_predictor: *id007
+    target_encoder: *id008
+    lr_scheduler: *id009
+    counter: *id010
+train_logger: !new:speechbrain.utils.train_logger.FileTrainLogger
+  save_file: 
+    results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/train_log.txt
+  precision: 2
+
+# All separator modules are initialized from scratch for this experiment.

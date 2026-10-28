@@ -1,0 +1,1 @@
+epoch: 1, lr: 1.50e-04 - train si-snr: -2.15, train source-prediction-loss: 2.50e-01, train total-loss: -2.12, train optimizer-steps: 6667, train skipped-optimizer-steps: 0 - valid si-snr: -2.91, valid si-snri: 2.91

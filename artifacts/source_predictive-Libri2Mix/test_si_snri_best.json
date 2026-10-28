@@ -1,0 +1,20 @@
+{
+  "checkpoint": "results/source-predictive-sepformer-jepa-scratch-libri2mix-train100/1234/save/CKPT+2026-09-12+14-20-59+00",
+  "checkpoint_metadata": {
+    "end-of-epoch": true,
+    "si-snr": -11.515365712086366,
+    "unixtime": 1789222859.9877417
+  },
+  "metric": "Mamba-TasNet SI-SNRi",
+  "eval": true,
+  "frozen": true,
+  "test_items": 3000,
+  "si_snr_db": 11.440371445566416,
+  "mixture_si_snr_db": 0.0005142894866876304,
+  "si_snri_db": 11.439857162177562,
+  "independent_check": {
+    "max_si_snr_abs_difference_db": 3.814697265625e-06,
+    "max_mixture_si_snr_abs_difference_db": 2.384185791015625e-06,
+    "max_si_snri_abs_difference_db": 3.814697265625e-06
+  }
+}
