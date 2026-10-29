@@ -3,7 +3,7 @@
 ## Nội dung đã copy
 
 - Các source/config SepFormer + JEPA đã xác định thuộc những nhánh `code`, `sepformer_jepa` và source-prediction được liệt kê bên dưới.
-- **Lưu ý về `source/test_DPRNN/Mamba-TasNet/`:** đây là code thử nghiệm Mamba-TasNet được giữ lại dư từ thư mục nguồn `research/work/test_DPRNN/Mamba-TasNet` trong lúc gom artifact. Đây **không phải kiến trúc SepFormer**, không được xác định là dependency của các run SepFormer + JEPA trong repo này, và không cần dùng để chạy các pipeline SepFormer + JEPA được mô tả bên dưới. Tên `test_DPRNN` là tên thư mục nguồn, không phải bằng chứng rằng code này là DPRNN. Thư mục được giữ để bảo toàn dấu vết audit; đừng dùng nó làm entry point cho SepFormer.
+- Cây code thử nghiệm `research/work/test_DPRNN/Mamba-TasNet` đã được loại khỏi repo này vì đó là trainer/architecture Mamba-TasNet, không phải SepFormer. Các JEPA modules cần cho các source SepFormer + JEPA còn lại đã có bản trùng khớp trong `source/code/` và `source/sepformer_jepa/`. Các YAML còn trong `configs/test_DPRNN/` chỉ được lưu làm artifact tham khảo; chưa xác minh chúng với trainer tương ứng và không coi đó là pipeline được hỗ trợ.
 - Source-prediction trainers/configs từ `source_predictive_sepformer` và `jepaformer`.
 - Một LRS2 SepFormer YAML từ `research/Mamba-TasNet`; YAML này khai báo `jepa_weight: 0.1`, nhưng trainer tại source tree đó không có JEPA hooks. Nó được giữ trong `configs/unmatched_Mamba-TasNet/` để bảo toàn artifact và không được xem là baseline config hay một pipeline +JEPA đã xác minh.
 - Các result folders riêng trong `artifacts/`, gồm checkpoint components, manifests, logs và JSON metrics có sẵn.
